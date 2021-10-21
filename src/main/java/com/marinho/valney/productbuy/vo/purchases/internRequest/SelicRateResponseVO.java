@@ -1,4 +1,4 @@
-package com.marinho.valney.productbuy.vo.purchases;
+package com.marinho.valney.productbuy.vo.purchases.internRequest;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,9 +9,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class PurchaseResponseVO {
-    private Integer numeroParcela;
+public class SelicRateResponseVO {
+    private String data;
     private Double valor;
-    private Double troco;
-    private Double taxaJurosAoMes;
 }
