@@ -27,11 +27,11 @@ API that calculate installments with rates based with selic rate
 ## Swagger
 Access http://localhost:8080/swagger-ui/index.html. If you see Swagger petstore. You can search for /v3/api-docs, for see the API doc.
 <p align="center">
-  <img src="https://github.com/valn3y/productbuy/blob/master/img/main-swagger.png" />
+  <img src="https://github.com/valn3y/productbuy/blob/main/img/main-swagger.png" />
 </p>
 
 <p align="center">
-  <img src="https://github.com/valn3y/productbuy/blob/master/img/api-swagger.png" />
+  <img src="https://github.com/valn3y/productbuy/blob/main/img/api-swagger.png" />
 </p>
 
 ## Developed by
