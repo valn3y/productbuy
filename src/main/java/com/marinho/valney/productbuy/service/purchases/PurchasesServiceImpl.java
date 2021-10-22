@@ -7,6 +7,7 @@ import com.marinho.valney.productbuy.vo.purchases.internRequest.SelicRateRespons
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.text.DecimalFormat;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -22,27 +23,35 @@ public class PurchasesServiceImpl implements PurchaseService{
 
     @Override
     public List<PurchaseResponseVO> purchaseSimulation(PurchaseRequestVO request) {
-        List<PurchaseResponseVO> purchaseResponseVOList = new ArrayList<>();
+        List<PurchaseResponseVO> purchaseResponseVOList;
         int installments = request.getCondicaoPagamento().getQtdeParcelas();
         double restPayment = request.getProduto().getValor() - request.getCondicaoPagamento().getValorEntrada();
 
         if(installments > 0 && restPayment > 0) {
-            purchaseResponseVOList = calculateInstallments(restPayment, installments);
+            purchaseResponseVOList = installments(restPayment, installments);
         } else {
-            PurchaseResponseVO purchaseResponseVO = PurchaseResponseVO.builder()
-                    .numeroParcela(0)
-                    .taxaJurosAoMes(0.0)
-                    .valor(restPayment > 0 ? restPayment : 0.0)
-                    .troco(restPayment < 0 ? restPayment * -1 : 0.0)
-                    .build();
-
-            purchaseResponseVOList.add(purchaseResponseVO);
+            purchaseResponseVOList = common(restPayment);
         }
 
         return purchaseResponseVOList;
     }
 
-    private List<PurchaseResponseVO> calculateInstallments(double restPayment, int installments) {
+    public List<PurchaseResponseVO> common(double restPayment) {
+        List<PurchaseResponseVO> purchaseResponseVOList = new ArrayList<>();
+
+        PurchaseResponseVO purchaseResponseVO = PurchaseResponseVO.builder()
+                .numeroParcela(0)
+                .taxaJurosAoMes(0.0)
+                .valor(restPayment > 0 ? restPayment : 0.0)
+                .troco(restPayment < 0 ? restPayment * -1 : 0.0)
+                .build();
+
+        purchaseResponseVOList.add(purchaseResponseVO);
+
+        return purchaseResponseVOList;
+    }
+
+    public List<PurchaseResponseVO> installments(double restPayment, int installments) {
         List<PurchaseResponseVO> purchaseResponseVOList = new ArrayList<>();
         double restPaymentDivided = restPayment / installments;
         double rate = 0.0;
@@ -56,11 +65,13 @@ public class PurchasesServiceImpl implements PurchaseService{
             if(installments > 6) {
                 double interestRatePerMonth = 0.0115 * rate;
                 double value = restPaymentDivided + (restPaymentDivided * interestRatePerMonth);
-                purchaseResponseVO.setTaxaJurosAoMes(interestRatePerMonth);
-                purchaseResponseVO.setValor(value);
+                purchaseResponseVO.setTaxaJurosAoMes(rateFormat(interestRatePerMonth));
+                purchaseResponseVO.setTroco(0.0);
+                purchaseResponseVO.setValor(cashFormat(value));
             } else {
                 purchaseResponseVO.setTaxaJurosAoMes(0.0);
-                purchaseResponseVO.setValor(restPaymentDivided);
+                purchaseResponseVO.setTroco(0.0);
+                purchaseResponseVO.setValor(cashFormat(restPaymentDivided));
             }
             purchaseResponseVOList.add(purchaseResponseVO);
         }
@@ -76,5 +87,15 @@ public class PurchasesServiceImpl implements PurchaseService{
                 today.format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
 
         return response.stream().map(SelicRateResponseVO::getValor).flatMapToDouble(DoubleStream::of).sum();
+    }
+
+    private double cashFormat(double value){
+        DecimalFormat decimalFormat = new DecimalFormat("#.00");
+        return Double.parseDouble(decimalFormat.format(value));
+    }
+
+    private double rateFormat(double value) {
+        DecimalFormat decimalFormat = new DecimalFormat("#.00000");
+        return Double.parseDouble(decimalFormat.format(value));
     }
 }

@@ -25,10 +25,9 @@ public class PurchasesController {
     private final PurchaseService purchaseService;
 
     @PostMapping
-    public ResponseEntity<List<PurchaseResponseVO>> createAccount(@Valid @RequestBody PurchaseRequestVO request) {
+    public ResponseEntity<List<PurchaseResponseVO>> createPurchase(@Valid @RequestBody PurchaseRequestVO request) {
         List<PurchaseResponseVO> data = purchaseService.purchaseSimulation(request);
 
-        URI location = ServletUriComponentsBuilder.fromCurrentRequest().build().toUri();
-        return ResponseEntity.created(location).body(data);
+        return ResponseEntity.ok().body(data);
     }
 }
